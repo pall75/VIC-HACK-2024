@@ -1,6 +1,6 @@
 # Cardiff Visual Computing Hackathon: Project Proposal and Selection
 
-**Project Leaders**: Please add your project description [Issues tab.](https://github.com/Lewis-Kitchingman/VIC-HACK-2024/issues)
+**Project Leaders**: Please add your project description in the [Issues tab.](https://github.com/Lewis-Kitchingman/VIC-HACK-2024/issues)
 
 **Participants Selecting Projects**: Please browse the project descriptions in the [Issues tab](https://github.com/Lewis-Kitchingman/VIC-HACK-2024/issues) and indicate your preferred projects using this MS Form [LINK TO BE ADDED].
 
