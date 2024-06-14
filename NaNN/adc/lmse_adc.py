@@ -7,6 +7,7 @@ from joblib import Parallel, delayed
 
 # Load the DWI data
 dwi='dwi_synth_denoised'
+dwi='dwi_synth'
 dwi_nii=dwi + '.nii.gz'
 dwi_bvals =dwi + '.bval'
 dwi_bvecs =dwi + '.bvec'
