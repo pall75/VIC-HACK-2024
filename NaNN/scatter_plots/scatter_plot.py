@@ -68,4 +68,3 @@ print(f'Scatter plot saved as {output_file}')
 
 # Show the plot
 plt.show()
-
