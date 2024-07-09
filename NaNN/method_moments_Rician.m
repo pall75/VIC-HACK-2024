@@ -20,7 +20,7 @@ y_data=[m_1_data(ind_brain) m_2_data(ind_brain)];
 x0=ones(length(ind_brain),2);
 
 options = optimoptions('lsqcurvefit','Display','iter');
-pars_hat=lsqcurvefit(@moments_rician,x0,x0,y_data,[],[],options);
+pars_hat=lsqcurvefit(@moments_rician,x0,x0,y_data,[0.5],[3],options);
 
 sigma_maps=zeros([size(brain_mask)]);nu_maps=zeros([size(brain_mask)]);
 sigma_maps(ind_brain)=pars_hat(:,1);
