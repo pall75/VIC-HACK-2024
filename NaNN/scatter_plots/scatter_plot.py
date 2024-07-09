@@ -6,14 +6,24 @@ import matplotlib.colors as mcolors
 # Load the NIfTI files
 D_img = nib.load('D.nii.gz')
 #D_img = nib.load('dwi_synth_adc.nii.gz')
-adc_img = nib.load('dwi_synth_adc.nii.gz')
+#adc_img = nib.load('dwi_synth_adc.nii.gz')
+adc_img = nib.load('D_MSENN.nii.gz')
+adc_img = nib.load('D_RLNN_constsigma.nii.gz')
+adc_img = nib.load('D_RLNN_svsigma.nii.gz')
 #adc_img = nib.load('dwi_synth_denoised_adc.nii.gz')
 sigma_img = nib.load('sigma.nii.gz')
+mask_img = nib.load('mask.nii.gz')
 
 # Get the data arrays from the NIfTI files
 D_data = D_img.get_fdata()
 adc_data = adc_img.get_fdata()
 sigma_data = sigma_img.get_fdata()
+mask_data = mask_img.get_fdata()
+
+# Ensure mask is binary (0 and 1)
+#mask_data = (mask_data > 0).astype(np.int)
+mask_data = (mask_data > 0).astype(np.int32)
+
 
 # Define the range for D values
 min_D = 0  # Set your desired minimum value for D
@@ -21,6 +31,12 @@ max_D = 3  # Set your desired maximum value for D
 
 # Compute the voxel-wise difference between D and adc
 difference = D_data - adc_data
+
+# Apply the mask to the data
+D_values = D_data[mask_data == 1]
+difference_values = difference[mask_data == 1]
+sigma_values = sigma_data[mask_data == 1]
+
 
 # Flatten the arrays for scatter plotting
 D_values = D_data.flatten()
@@ -53,4 +69,3 @@ print(f'Scatter plot saved as {output_file}')
 
 # Show the plot
 plt.show()
-
