@@ -14,13 +14,13 @@ m_2_data=1/9*sum(B0s.^2,4);
 
 brain_mask=double(niftiread('dwi_synth_mask.nii.gz'));
 
-ind_brain=find(brain_mask);
+ind_brain=find(brain_mask(43:86,43:86,29:30));
 y_data=[m_1_data(ind_brain) m_2_data(ind_brain)];
 
 x0=ones(length(ind_brain),2);
 
-options = optimoptions('lsqcurvefit','Display','iter');
-pars_hat=lsqcurvefit(@moments_rician,x0,x0,y_data,[0.5],[3],options);
+fun = @(x)moments_rician(x,y_data); % fun now has the new c value
+pars_hat=fsolve(fun,x0);
 
 sigma_maps=zeros([size(brain_mask)]);nu_maps=zeros([size(brain_mask)]);
 sigma_maps(ind_brain)=pars_hat(:,1);
@@ -36,7 +36,7 @@ imagesc(nu_maps(:,:,1));colorbar;title('nu')
 subplot 133
 imagesc(sigma_gt(:,:,1));colorbar;title('sigma gt')
 
-function mus_rician = moments_rician(par,xdata)
+function F = moments_rician(par,y_data)
 %https://en.wikipedia.org/wiki/Rice_distribution
     sigma=par(:,1);
     nu=par(:,2);
@@ -49,6 +49,8 @@ function mus_rician = moments_rician(par,xdata)
     I1_mxp5=besseli(1,-x/2);    
     
     L_0p5_x=exp(x/2).*((1-x).*I0_mxp5-x.*I1_mxp5);
-    mus_rician(:,1)=sigma.*sqrt(pi/2).*L_0p5_x;
-    mus_rician(:,2)= 2*sigma2+nu2;
+    mu_1_rician=sigma.*sqrt(pi/2).*L_0p5_x;
+    mu_2_rician= 2*sigma2+nu2;
+
+    F=y_data-[mu_1_rician mu_2_rician];
 end
