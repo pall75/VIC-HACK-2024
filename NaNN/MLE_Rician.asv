@@ -1,0 +1,79 @@
+clear all
+close all
+clc
+addpath(genpath('C:\Users\c1668701\OneDrive - Cardiff University\Documents\GitHub\VIC-HACK-2024_2\NaNN'))
+addpath(genpath('/home/c1668701/VIC-HACK-2024/NaNN/syn_data'))
+
+
+%% MLE
+dwi_synth_1=double(niftiread('dwi_synth_1.nii.gz'));
+dwi_synth_2=double(niftiread('dwi_synth_2.nii.gz'));
+dwi_synth=cat(4,dwi_synth_1,dwi_synth_2);
+
+B0s=dwi_synth(:,:,34,1:9);
+
+brain_mask=double(niftiread('/home/c1668701/VIC-HACK-2024/NaNN/syn_data/dwi_synth_mask.nii.gz'));
+brain_mask=brain_mask(:,:,34);
+ind_brain=find(brain_mask);
+
+B0s_brainList=zeros([length(ind_brain),9]);
+for i_b=1:9
+    tmp=B0s(:,:,:,i_b);
+    B0s_brainList(:,i_b)=tmp(ind_brain);
+end
+
+cube_str=strel('cube',3);
+[x_incr,y_incr,z_incr]=ind2sub([3,3,3],find(cube_str.Neighborhood));
+x_incr=x_incr-2;
+y_incr=y_incr-2;
+z_incr=z_incr-2;
+
+sigma_mle=zeros(size(brain_mask));
+nu_mle=zeros(size(brain_mask));
+pars_hat_list=zeros([length(ind_brain),2]);
+for i_v=1:length(ind_brain)
+    [x_v,y_v,z_v]=ind2sub(size(brain_mask),i_v);
+    cube_ind=[x_v,y_v,z_v]+[x_incr,y_incr,z_incr];
+    i_v_neighb=sub2ind(size(brain_mask),x_v,y_v,z_v);
+    pars_hat_list(i_v,:)=mle(B0s_brainList(i_v,:),'Distribution','rician');
+    disp(i_v)
+end
+sigma_est=zeros([size(brain_mask)]);nu_est=zeros([size(brain_mask)]);
+    % s: noncentrality parameter	σ: scale parameter
+sigma_est(ind_brain)=pars_hat_list(:,2);
+nu_est(ind_brain)=pars_hat_list(:,1);
+
+sigma_gt=double(niftiread('sigma_map_gt.nii.gz'));
+sigma_gt=sigma_gt(:,:,34);
+
+figure;
+subplot 221
+imagesc(nu_est(:,:,1));colorbar;title('nu')
+subplot 223
+imagesc(sigma_gt(:,:,1));colorbar;title('sigma gt')
+caxis([0.15,.2]);c_axis=caxis;
+subplot 222
+imagesc(sigma_est(:,:,1));colorbar;title('sigma est')
+caxis(c_axis);
+subplot 224
+imagesc(sigma_est(:,:,1)-sigma_gt(:,:,1));colorbar;title('sigma est - sigma gt')
+caxis([-0.1,0.1]);
+
+ return
+ 
+%% From Python
+load /home/c1668701/VIC-HACK-2024/NaNN/syn_data/sigma_est_MoM.mat
+ind_brain=find(brain_mask);
+nu_map=zeros(size(brain_mask));
+sigma_map=zeros(size(brain_mask));
+sigma_map(ind_brain)=sigma_est;
+nu_map(ind_brain)=nu_est;
+
+sigma_gt=double(niftiread('sigma_map_gt.nii.gz'));
+sigma_gt=sigma_gt(43:86,43:86,28);
+
+figure
+subplot 221;imagesc(sigma_map)
+subplot 222;imagesc(nu_map)
+subplot 223;imagesc(sigma_gt)
+subplot 224;imagesc(sigma_map-sigma_gt)
